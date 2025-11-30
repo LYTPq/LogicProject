@@ -115,7 +115,7 @@ Command-line options:
   Default: `./glucose`.
 
 * `-v {0,1}`, `--verb {0,1}`
-  Verbosity level of the SAT solver (0 = silent, 1 = full solver output).
+  Verbosity level of the SAT solver.
   Default: `1`.
 
 ## Example instances
@@ -124,10 +124,10 @@ Command-line options:
   A trivially satisfiable small instance.
 
 * `small_negative.in`
-  An unsatisfiable instance (e.g. an empty set is present).
+  An unsatisfiable instance.
 
-* `random_50_20.in`
-  Random instance with 50 elements and 20 sets — solved instantly.
+* `nontrivial_positive.in`
+  Random instance with 100_000 elements and 500_000 sets
 
 ## Experiments
 
