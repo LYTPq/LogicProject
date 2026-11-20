@@ -26,6 +26,7 @@ def attacks(r1, c1, r2, c2):
 
 
 def new_var():
+    # helper variable
     global NR_VARS
     NR_VARS += 1
     return NR_VARS
