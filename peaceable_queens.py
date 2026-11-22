@@ -32,6 +32,40 @@ def new_var():
     return NR_VARS
 
 
+
+def at_least(cnf, xs, k):
+    # clauses say that at least k of the variables in xs are true
+    # helper variable s[i][j] means "among the first i+1 variables of xs
+    if k <= 0:
+        return
+ 
+
+    L = len(xs)
+    s = [[new_var() for j in range(k)] for i in range(L)]
+ 
+
+    cnf.append([-s[0][0], xs[0]])
+    for j in range(1, k):
+        cnf.append([-s[0][j]])
+ 
+
+    for i in range(1, L):
+        for j in range(k):
+            if j == 0:
+                # helper variable s[i][j] means "at least j+1 of the first i+1 
+                # variables of xs are true"
+                cnf.append([-s[i][0], s[i - 1][0], xs[i]])
+            else:
+                # at least j+1 among the first i+1: already among the first i
+                # or x_i is true and at least j among the first i
+                cnf.append([-s[i][j], s[i - 1][j], xs[i]])
+                cnf.append([-s[i][j], s[i - 1][j], s[i - 1][j - 1]])
+
+
+    # require at least k among all of them
+    cnf.append([s[L - 1][k - 1]])
+
+
 def encode():
     # given the instance, create a cnf formula, i.e. a list of lists of integers
     # also return the total number of variables used
@@ -51,6 +85,10 @@ def encode():
                 for c2 in range(N):
                     if (r1, c1) != (r2, c2) and attacks(r1, c1, r2, c2):
                         cnf.append([-w(r1, c1), -b(r2, c2)])
+    
+    # at least M white queens and at least M black queens
+    at_least(cnf, [w(r, c) for r in range(N) for c in range(N)], M)
+    at_least(cnf, [b(r, c) for r in range(N) for c in range(N)], M)
 
     return cnf, NR_VARS
 
@@ -107,12 +145,8 @@ if __name__ == "__main__":
  
     N, M = load_instance(args.input)
 
-    # print("n =", N, "m =", M)
-    # print("w(0,0) =", w(0, 0), " w(N-1,N-1) =", w(N-1, N-1))
-    # print("b(0,0) =", b(0, 0), " b(N-1,N-1) =", b(N-1, N-1))
+    cnf, nr_vars = encode()
+    write_dimacs(cnf, nr_vars, args.output)
 
-    # cnf, nr_vars = encode()
-    # write_dimacs(cnf, nr_vars, args.output)
-
-    # print("n =", N, "m =", M)
-    # print(nr_vars, "variables,", len(cnf), "clauses")
+    print("n =", N, "m =", M)
+    print(nr_vars, "variables,", len(cnf), "clauses")
