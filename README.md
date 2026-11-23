@@ -71,3 +71,22 @@ Total number of Boolean variables: $2n^2$, plus helper variables for counting qu
 ```
 
 Two cells are on the same diagonal if $r_1 - c_1 = r_2 - c_2$, and on the same anti-diagonal if $r_1 + c_1 = r_2 + c_2$.
+
+3. At least $m$ queens of each color
+
+It is enough to require at least $m$ queens of each color: removing a queen never creates an attack, so any solution with more than $m$ queens of a color can be reduced to exactly $m$.
+
+We count the queens of one color with a sequential counter. For the cell variables $x_1, \dots, x_L$ of that color ($L = n^2$), helper variable $s_{i,j}$ means "at least $j$ of $x_1, \dots, x_i$ are true", for $1 \le j \le m$:
+
+```
+¬s(1,1) ∨ x1
+¬s(1,j)                              for j > 1
+¬s(i,1) ∨ s(i-1,1) ∨ x_i             for i > 1
+¬s(i,j) ∨ s(i-1,j) ∨ x_i             for i > 1, j > 1
+¬s(i,j) ∨ s(i-1,j) ∨ s(i-1,j-1)      for i > 1, j > 1
+s(L,m)
+```
+
+Last clause says "at least $m$ in total". Other clauses make sure this can't be true unless there really are $m$ cells with a queen
+
+This adds $n^2 m$ helper variables and about $2 n^2 m$ clauses per color.
