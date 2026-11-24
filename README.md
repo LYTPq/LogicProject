@@ -90,3 +90,21 @@ s(L,m)
 Last clause says "at least $m$ in total". Other clauses make sure this can't be true unless there really are $m$ cells with a queen
 
 This adds $n^2 m$ helper variables and about $2 n^2 m$ clauses per color.
+
+## User documentation
+
+Basic usage:
+```
+peaceable_queens.py [-h] [-i INPUT] [-o OUTPUT] [-s SOLVER] [-v {0,1}]
+```
+
+Command-line options:
+
+* `-h`, `--help` : Show a help message and exit.
+* `-i INPUT`, `--input INPUT` : The instance file. Default: "instances/input.in".
+* `-o OUTPUT`, `--output OUTPUT` : Output file for the DIMACS format (i.e. the CNF formula). Default: "formula.cnf".
+* `-s SOLVER`, `--solver SOLVER` : The SAT solver to be used. Default: "./glucose".
+* `-v {0,1}`, `--verb {0,1}` : Verbosity of the SAT solver used.
+
+
+The script prints the whole output of the SAT solver, then the result in a human-readable format: the board with `W` for a white queen, `B` for a black queen and `.` for an empty cell, or a message that no placement exists. After decoding, the placement is checked directly in Python, without the CNF, and the result is printed as `Check: OK` or `Check: FAILED`.
