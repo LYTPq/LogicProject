@@ -1,5 +1,5 @@
-import sys
 from argparse import ArgumentParser
+import subprocess
  
 def load_instance(path):
     # read the input instance
@@ -99,6 +99,89 @@ def write_dimacs(cnf, nr_vars, path):
         for clause in cnf:
             file.write(" ".join(str(lit) for lit in clause) + " 0\n")
 
+def call_solver(cnf_path, solver_name, verbosity):
+    # run the SAT solver on the CNF file and return its output
+    return subprocess.run([solver_name, "-model", "-verb=" + str(verbosity), cnf_path],
+                          stdout=subprocess.PIPE)
+
+def decode(model):
+    # turn the model (list of literals) into the lists of white and black queens
+    true_vars = set(lit for lit in model if lit > 0)
+    white = [(r, c) for r in range(N) for c in range(N) if w(r, c) in true_vars]
+    black = [(r, c) for r in range(N) for c in range(N) if b(r, c) in true_vars]
+    return white, black
+
+
+def verify(white, black):
+    # checking the placement directly, without CNF
+    # enough queens, no shared cell, no white queen attacking a black one
+    if len(white) < M or len(black) < M:
+        return False
+    if set(white) & set(black):
+        return False
+    for (r1, c1) in white:
+        for (r2, c2) in black:
+            if attacks(r1, c1, r2, c2):
+                return False
+    return True
+
+
+
+
+def print_board(white, black):
+    for r in range(N):
+        row = []
+        for c in range(N):
+            if (r, c) in white:
+                row.append("W")
+            elif (r, c) in black:
+                row.append("B")
+            else:
+                row.append(".")
+        print(" ".join(row))
+
+
+
+def print_header():
+    print()
+    print("##################################################################")
+    print("##########[ Human readable result of peaceable queens ]##########")
+    print("##################################################################")
+    print()
+
+
+
+def print_result(result):
+    output = result.stdout.decode("utf-8")
+    for line in output.split("\n"):
+        print(line)                 # the whole output of the SAT solver, including its statistics
+ 
+    # returncode of the solver: 10 = SAT, 20 = UNSAT
+    if result.returncode == 20:
+        print_header() 
+        print(f"No placement of {M} white and {M} black queens on a {N}x{N} board exists.")
+        return
+ 
+    # parse the model from the output of the solver
+    # the model is on lines starting with 'v'
+    model = []
+    for line in output.split("\n"):
+        if line.startswith("v"):
+            model.extend(int(v) for v in line.split()[1:])
+ 
+    white, black = decode(model)
+ 
+    print()
+    print_header()
+    print(f"Placement found: {len(white)} white and {len(black)} black queens on a {N}x{N} board")
+    print()
+    print_board(white, black)
+    print()
+    print("Check:", "OK" if verify(white, black) else "FAILED")
+ 
+ 
+
+
 
 if __name__ == "__main__":
 
@@ -143,10 +226,15 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
  
+    # get the input instance 
     N, M = load_instance(args.input)
 
+    # encode the problem to create CNF formula
     cnf, nr_vars = encode()
     write_dimacs(cnf, nr_vars, args.output)
 
-    print("n =", N, "m =", M)
-    print(nr_vars, "variables,", len(cnf), "clauses")
+    # call the SAT solver and get the result
+    result = call_solver(args.output, args.solver, args.verb)
+ 
+    # interpret the result and print it in a human-readable format
+    print_result(result)
