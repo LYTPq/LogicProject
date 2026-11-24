@@ -91,6 +91,14 @@ Last clause says "at least $m$ in total". Other clauses make sure this can't be 
 
 This adds $n^2 m$ helper variables and about $2 n^2 m$ clauses per color.
 
+### Alternatives
+
+* **Line coloring.** One variable per line ("this line is white") instead of pairwise attack clauses: $8n^2 - 8$ clauses instead of about $\frac{10}{3}n^3$. It is correct but not faster.
+* **Naive counting.** For every group of $n^2 - m + 1$ cells, one clause saying at least one of them has a queen. No helper variables, but too many clauses.
+* **Totalizer.** Count each half of the cells recursively and add the counts in a tree. Similar size to the sequential counter.
+* **"Exactly m" instead of "at least m".** More clauses, same answers.
+
+
 ## User documentation
 
 Basic usage:
@@ -108,3 +116,13 @@ Command-line options:
 
 
 The script prints the whole output of the SAT solver, then the result in a human-readable format: the board with `W` for a white queen, `B` for a black queen and `.` for an empty cell, or a message that no placement exists. After decoding, the placement is checked directly in Python, without the CNF, and the result is printed as `Check: OK` or `Check: FAILED`.
+
+
+## Example instances
+
+* `small-sat.in` (`3 1`): A small satisfiable instance, 1 white and 1 black queen on a 3x3 board.
+* `small-unsat.in` (`3 2`): A small unsatisfiable instance, 2 queens of each color on a 3x3 board.
+* `medium-sat.in` (`8 9`): A satisfiable instance on a standard board, at the maximum for n = 8. Solved in under a second.
+* `nontrivial-sat.in` (`11 17`): A satisfiable instance at the maximum for n = 11 that takes approximately 25 s on my machine.
+
+
